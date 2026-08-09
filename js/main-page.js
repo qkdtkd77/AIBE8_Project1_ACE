@@ -135,8 +135,15 @@ const filteredDates = () => {
   return filteredFestivals;
 };
 
-const handleFilterClick = () => {
-  filteredFestivals = filteredDates();
+const handleFilterClick = (e) => {
+  const selectedValue = e.currentTarget.value;
+
+  if (selectedValue === "week") {
+    filteredFestivals = filteredDates();
+  } else {
+    filteredFestivals = allFestivals;
+  }
+
   currentPage = 1;
   renderFestivalList();
   renderPagination();
@@ -145,4 +152,5 @@ const handleFilterClick = () => {
 document.addEventListener("DOMContentLoaded", async () => {
   await getFestivalList();
   renderPagination();
+  $("#periodFilter").addEventListener("change", handleFilterClick);
 });
