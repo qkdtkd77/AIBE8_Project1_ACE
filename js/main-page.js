@@ -10,7 +10,10 @@ let allFestivals = [];
 let currentPage = 1;
 const PAGE_SIZE = 4;
 let filteredFestivals = [];
+let selectedArea = "";
+let selectedPeriod = "";
 
+// ------------------------ 축제 목록 ------------------------//
 const getFestivalList = async () => {
   const container = $("#festival-grid");
   showLoading(container);
@@ -68,6 +71,7 @@ const handleCardClick = (event) => {
   location.href = `detail.html?contentId=${festivalId}`;
 };
 
+// ------------------------ 페이지네이션 ------------------------//
 const renderPagination = () => {
   const totalPages = Math.ceil(filteredFestivals.length / PAGE_SIZE);
   let pageNumbers = [];
@@ -114,6 +118,7 @@ const handlePrevPageClick = () => {
   renderPagination();
 };
 
+// ------------------------ 드롭박스 ------------------------//
 const parseDate = (dateString) => {
   const year = Number(dateString.slice(0, 4));
   const month = Number(dateString.slice(4, 6));
@@ -121,36 +126,46 @@ const parseDate = (dateString) => {
   return new Date(year, month - 1, day);
 };
 
-const filteredDates = () => {
-  const todayStart = new Date();
-  const todayEnd = new Date();
-  todayEnd.setDate(todayEnd.getDate() + 7);
+const filters = () => {
+  filteredFestivals = allFestivals.filter((f) => {
+    const todayStart = new Date();
+    const todayEnd = new Date();
+    todayEnd.setDate(todayEnd.getDate() + 7);
 
-  const filteredFestivals = allFestivals.filter((festival) => {
-    return !(
-      parseDate(festival.eventEndDate) < todayStart ||
-      parseDate(festival.eventStartDate) > todayEnd
-    );
+    const filteredPeriod =
+      selectedPeriod === "week"
+        ? !(
+            parseDate(f.eventEndDate) < todayStart ||
+            parseDate(f.eventStartDate) > todayEnd
+          )
+        : true;
+
+    const filteredArea =
+      selectedArea === "all" || selectedArea === ""
+        ? true
+        : f.address.includes(selectedArea);
+
+    return filteredPeriod && filteredArea;
   });
-  return filteredFestivals;
-};
-
-const handleFilterClick = (e) => {
-  const selectedValue = e.currentTarget.value;
-
-  if (selectedValue === "week") {
-    filteredFestivals = filteredDates();
-  } else {
-    filteredFestivals = allFestivals;
-  }
 
   currentPage = 1;
   renderFestivalList();
   renderPagination();
 };
 
+const handlePeriodChange = (e) => {
+  selectedPeriod = e.currentTarget.value;
+  filters();
+};
+
+const handleAreaChange = (e) => {
+  selectedArea = e.currentTarget.value;
+  filters();
+};
+
 document.addEventListener("DOMContentLoaded", async () => {
   await getFestivalList();
   renderPagination();
-  $("#periodFilter").addEventListener("change", handleFilterClick);
+  $("#periodFilter").addEventListener("change", handlePeriodChange);
+  $("#areaFilter").addEventListener("change", handleAreaChange);
 });
