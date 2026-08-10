@@ -6,72 +6,71 @@
  * ======================================
  */
 
-//------------------ 목록으로 ------------------//
+let festivalDetail = [];
+
+//------------------ 목록으로 버튼 ------------------//
 const backBtn = $("#back-btn");
 backBtn.addEventListener("click", () => {
   location.href = "index.html";
 });
 
-//------------------ 이 축제로 코스짜기 ------------------//
+//------------------ 이 축제로 코스짜기 버튼 ------------------//
 const ctaBtn = $("#cta-btn");
-ctaBtn.addEventListener("click", () => {
-  location.href = "nearby.html";
-});
 
-//------------------ 목록으로 ------------------//
-const createFestivalHTML = (festival) => {
+const handleCtaBtnClick = () => {
+  const festivalId = festivalDetail.id;
+  const festivalLongitude = festivalDetail.longitude;
+  const festivalLatitude = festivalDetail.latitude;
+  location.href = `nearby.html?contentId=${festivalId}&longitude=${festivalLongitude}&latitude=${festivalLatitude}`;
+};
+
+ctaBtn.addEventListener("click", handleCtaBtnClick);
+
+//------------------ 상세페이지 ------------------//
+const getFestival = async () => {
+  const container = $("#festival-detail");
+  showLoading(container);
+  const currentFestivalId = getCurrentFestival();
+  festivalDetail = await getFestivalDetail(currentFestivalId);
+
+  renderFestivalDetails();
+};
+
+const createFestivalDetailHTML = (f) => {
   return `
-    <div class="festival-card" data-festival-id="${escapeHtml(festival.id)}">
-      <div class="festival-card-image-wrap">
-        <img src="${escapeHtml(festival.image)}" />
+    <div class="hero-image-wrap">
+        <img id="hero-img" alt="" src="${escapeHtml(f.image)}" />
       </div>
-      <div class="festival-card-body">
-        <p class="festival-card-title">${escapeHtml(festival.title)}</p>
-        <p class="festival-card-period">${formatDate(festival.eventStartDate)} - ${formatDate(festival.eventEndDate)}</p>
-        <p class="festival-card-location">${escapeHtml(festival.address)}</p>
+
+      <div class="detail-info">
+        <div class="detail-title-row">
+          <h1 id="festival-title">${escapeHtml(f.title)}</h1>
+          <span id="status-badge-container"></span>
+        </div>
+        <div class="detail-meta">
+          <div class="detail-meta-row" id="meta-period">${formatDate(f.eventStartDate)} - ${formatDate(f.eventEndDate)}</div>
+          <div class="detail-meta-row" id="meta-location">${escapeHtml(f.address)}</div>
+        </div>
+        <p class="detail-description" id="festival-description">${escapeHtml(f.overview)}</p>
       </div>
-    </div>
   `;
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-  createFestivalHTML();
-});/**
- * ======================================
- * detail-page.js
- * --------------------------------------
- * 축제 상세 페이지
- * ======================================
- */
+const renderFestivalDetails = () => {
+  const container = $("#festival-detail");
+  if (!container) return;
+  else if (festivalDetail === null)
+    return showEmpty(container, "페이지를 찾을 수 없습니다.");
 
-//------------------ 목록으로 ------------------//
-const backBtn = $("#back-btn");
-backBtn.addEventListener("click", () => {
-  location.href = "index.html";
-});
+  container.innerHTML = createFestivalDetailHTML(festivalDetail);
+};
 
-//------------------ 이 축제로 코스짜기 ------------------//
-const ctaBtn = $("#cta-btn");
-ctaBtn.addEventListener("click", () => {
-  location.href = "nearby.html";
-});
-
-//------------------ 목록으로 ------------------//
-const createFestivalHTML = (festival) => {
-  return `
-    <div class="festival-card" data-festival-id="${escapeHtml(festival.id)}">
-      <div class="festival-card-image-wrap">
-        <img src="${escapeHtml(festival.image)}" />
-      </div>
-      <div class="festival-card-body">
-        <p class="festival-card-title">${escapeHtml(festival.title)}</p>
-        <p class="festival-card-period">${formatDate(festival.eventStartDate)} - ${formatDate(festival.eventEndDate)}</p>
-        <p class="festival-card-location">${escapeHtml(festival.address)}</p>
-      </div>
-    </div>
-  `;
+const getCurrentFestival = () => {
+  const festivalId = getQueryParam("contentId");
+  return festivalId;
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  createFestivalHTML();
+  getFestival();
+  renderFestivalDetails();
 });
