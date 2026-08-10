@@ -6,7 +6,6 @@
  * ======================================
  */
 
-
 const handleLogoutClick = async () => {
   const signOutResult = await window.Auth.signOut();
 
@@ -23,9 +22,12 @@ const renderHeader = async () => {
   const currentUserResult = await window.Auth.getCurrentUser();
   const isLoggedIn =
     currentUserResult.ok && Boolean(currentUserResult.data?.user);
+  const nickname = isLoggedIn
+    ? currentUserResult.data.user.user_metadata.nickname
+    : "";
   const rightArea = isLoggedIn // 로그인 시 페이지와 로그아웃 시 페이지
-
     ? `<button id="schedule-btn" class="icon-btn">${getIcon("schedule")}</button>
+      <span class="avatar">${escapeHtml(nickname)}</span>
       <button id="logout-btn" class="link-btn">로그아웃</button>`
     : `<button id="schedule-btn" class="icon-btn">${getIcon("schedule")}</button>
       <button id="login-btn" class="link-btn">로그인</button>
